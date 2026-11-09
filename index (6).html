@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Coding Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        utOrange: '#ff8200',
+                        utWhite: '#ffffff',
+                        utDarkGray: '#4b4b4b',
+                        utLightBlue: '#489fdf',
+                        panelBg: '#3a3a3a',
+                        cardBg: '#2a2a2a'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #4b4b4b; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .radio-card { transition: all 0.2s ease-in-out; }
+        
+        /* Checked state styling */
+        input[type="radio"]:checked + .radio-card {
+            border-color: #ff8200;
+            background-color: #5a4231; /* Subtle warm tint for dark mode */
+            box-shadow: 0 0 0 1px #ff8200;
+        }
+        
+        /* WCAG AA Compliant Keyboard Focus */
+        input[type="radio"]:focus-visible + .radio-card {
+            outline: 4px solid #489fdf;
+            outline-offset: 2px;
+            border-color: #489fdf;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 text-gray-100">
+
+    <div class="max-w-7xl mx-auto">
+        <!-- Header: Modern, sleek design -->
+        <div class="bg-panelBg text-gray-100 p-10 text-center shadow-md rounded-t-xl">
+            <h1 class="text-5xl font-extrabold mb-3 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-utOrange to-utLightBlue">Vibe Coding Calculator</h1>
+            <p class="font-medium text-xl text-gray-300">Vibe Coding vs. Authoring Tools</p>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-8 mt-8">
+            <!-- Questions Column -->
+            <div class="lg:w-2/3">
+                <p class="mb-8 text-gray-200 font-medium text-lg bg-panelBg p-6 rounded-lg shadow-md">
+                    Answer the following 10 questions to determine the most efficient development path for your Interactive Learning Object (ILO).
+                </p>
+                <form id="calculatorForm" class="space-y-8">
+                    <!-- Questions will be injected here by JS -->
+                </form>
+            </div>
+
+            <!-- Results Column (Sticky Side Panel) -->
+            <div class="lg:w-1/3">
+                <div id="resultsSection" class="sticky top-8 p-8 rounded-lg bg-panelBg shadow-xl z-10">
+                    <h2 class="text-3xl font-extrabold text-center mb-3 text-gray-100" id="recommendationTitle">Recommendation</h2>
+                    <p id="recommendationText" class="text-lg text-center mb-10 font-semibold text-gray-300">Select options to see your recommendation dynamically update.</p>
+                    
+                    <!-- Visual Gauge / Gradient Bar Graph -->
+                    <div class="mb-12" aria-hidden="true">
+                        <div class="flex justify-between text-sm font-bold text-gray-200 mb-3">
+                            <span class="w-1/3 text-left">Vibe Coding</span>
+                            <span class="w-1/3 text-center">Hybrid</span>
+                            <span class="w-1/3 text-right">Authoring Tool</span>
+                        </div>
+                        <div class="relative h-8 rounded-full overflow-hidden border border-gray-600 shadow-inner">
+                            <!-- Gradient Background -->
+                            <div class="absolute top-0 left-0 h-full w-full bg-gradient-to-r from-utLightBlue via-gray-400 to-utOrange"></div>
+                            <!-- Indicator Marker -->
+                            <div id="gaugeIndicator" class="absolute top-0 h-full w-4 bg-gray-100 border-2 border-panelBg shadow-md transition-all duration-500 ease-out" style="left: 50%; transform: translateX(-50%);"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-cardBg p-6 rounded-lg shadow-sm">
+                        <h3 class="font-extrabold text-gray-100 mb-3 text-xl">📦 Packaging & LMS Strategy:</h3>
+                        <p id="packagingText" class="text-gray-300 text-lg leading-relaxed">Select an LMS Integration strategy in Question 6 to see packaging recommendations.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                id: 'q1',
+                title: '1. Amount & Structure of Content',
+                options: [
+                    { text: 'Massive amount of text or data', score: -1 },
+                    { text: 'Moderate amount of standard text/images', score: 0 },
+                    { text: 'Small, fixed number of slides', score: 1 }
+                ]
+            },
+            {
+                id: 'q2',
+                title: '2. Visual Layout & Interactivity',
+                options: [
+                    { text: 'Logic-heavy (calculators, sorting data, text inputs)', score: -2 },
+                    { text: 'Standard web layouts with basic clicks/reveals', score: 0 },
+                    { text: 'Highly visual, spatial drag-and-drops, or virtual tours (multiple rooms, 360 environments)', score: 3 }
+                ]
+            },
+            {
+                id: 'q3',
+                title: '3. Complexity of Interactions',
+                options: [
+                    { text: 'Standard web logic and math', score: -1 },
+                    { text: 'Moderate conditional logic', score: 0 },
+                    { text: 'Complex visual states and custom clickable areas', score: 1 }
+                ]
+            },
+            {
+                id: 'q4',
+                title: '4. IT Security Rules',
+                options: [
+                    { text: 'Allowed to use custom code and external links', score: -1 },
+                    { text: 'Standard rules apply', score: 0 },
+                    { text: 'Strict rules: Must use trusted, standard LMS files only', score: 1 }
+                ]
+            },
+            {
+                id: 'q5',
+                title: '5. Will students use phones for this activity?',
+                options: [
+                    { text: 'Yes, but developers can custom-code mobile layouts', score: -1 },
+                    { text: 'No, mostly desktop or laptop users', score: 0 },
+                    { text: 'Yes, and it needs to automatically adjust for phones', score: 1 }
+                ]
+            },
+            {
+                id: 'q6',
+                title: '6. LMS Integration & Grading Strategy',
+                options: [
+                    { text: 'Web Embed (No Tracking Needed)', score: -1, type: 'embed' },
+                    { text: 'Percentage Grade (Native SCORM)', score: -1, type: 'native_scorm' },
+                    { text: 'Hybrid (Web Object + Storyline Questions)', score: 0, type: 'hybrid' },
+                    { text: 'Completion Grade Only (Rise)', score: 1, type: 'rise' }
+                ]
+            },
+            {
+                id: 'q7',
+                title: '7. Team Skills & Future Maintenance',
+                options: [
+                    { text: 'Maintained by developers comfortable with custom code', score: -1 },
+                    { text: 'Mixed team capabilities', score: 0 },
+                    { text: 'Handoff to non-technical IDs (Requires visual authoring tool)', score: 1 }
+                ]
+            },
+            {
+                id: 'q8',
+                title: '8. Stakeholder Review & QA Workflow',
+                options: [
+                    { text: 'Informal staging links or emails are sufficient', score: -1 },
+                    { text: 'Moderate review needs', score: 0 },
+                    { text: 'Requires frame-by-frame contextual comments (e.g., Review 360)', score: 1 }
+                ]
+            },
+            {
+                id: 'q9',
+                title: '9. Accessibility (ADA/WCAG) Requirements',
+                options: [
+                    { text: 'Comfortable prompting and testing custom screen reader code', score: -1 },
+                    { text: 'Relies on built-in compliance tools (Focus order managers, etc.)', score: 1 }
+                ]
+            },
+            {
+                id: 'q10',
+                title: '10. Testing & Quality Assurance',
+                options: [
+                    { text: 'Comfortable thoroughly testing custom code across different browsers and devices', score: -1 },
+                    { text: 'Can do basic testing but prefer some built-in reliability', score: 0 },
+                    { text: 'Prefer tools that are pre-tested to work reliably on all browsers and devices', score: 1 }
+                ]
+            }
+        ];
+
+        const form = document.getElementById('calculatorForm');
+
+        // Render questions
+        questions.forEach((q, index) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'bg-panelBg p-6 rounded-lg shadow-md';
+            
+            // Grouping inputs by name ensures arrow keys work natively
+            let optionsHtml = q.options.map((opt, i) => `
+                <label class="cursor-pointer relative block h-full">
+                    <input type="radio" name="${q.id}" value="${opt.score}" data-type="${opt.type || ''}" class="sr-only" required>
+                    <div class="radio-card p-4 rounded-lg border-2 border-transparent bg-utDarkGray hover:bg-gray-500 h-full flex items-center">
+                        <span class="text-base font-semibold text-gray-200">${opt.text}</span>
+                    </div>
+                </label>
+            `).join('');
+
+            questionDiv.innerHTML = `
+                <fieldset>
+                    <legend class="text-xl font-extrabold text-gray-100 mb-4">${q.title}</legend>
+                    <div class="grid grid-cols-1 md:grid-cols-${q.options.length} gap-4">
+                        ${optionsHtml}
+                    </div>
+                </fieldset>
+            `;
+            form.appendChild(questionDiv);
+        });
+
+        // Live update listener
+        form.addEventListener('change', calculateResult);
+
+        function calculateResult() {
+            const formData = new FormData(form);
+            let totalScore = 0;
+            let answeredCount = 0;
+            let gradingType = '';
+
+            for (let [key, value] of formData.entries()) {
+                totalScore += parseInt(value);
+                answeredCount++;
+                
+                if (key === 'q6') {
+                    const selectedRadio = document.querySelector(`input[name="q6"]:checked`);
+                    if (selectedRadio) {
+                        gradingType = selectedRadio.getAttribute('data-type');
+                    }
+                }
+            }
+
+            const recommendationTitle = document.getElementById('recommendationTitle');
+            const recommendationText = document.getElementById('recommendationText');
+            const packagingText = document.getElementById('packagingText');
+            const gaugeIndicator = document.getElementById('gaugeIndicator');
+
+            // Determine primary recommendation
+            if (answeredCount === 0) {
+                recommendationTitle.textContent = "Recommendation";
+                recommendationText.textContent = "Select options to see your recommendation dynamically update.";
+            } else if (totalScore <= -3) {
+                recommendationTitle.textContent = "Strong Fit: Vibe Coding";
+                recommendationText.textContent = "Your project is logic-heavy and well-suited for AI-generated web code.";
+            } else if (totalScore >= 3) {
+                recommendationTitle.textContent = "Strong Fit: Authoring Tool";
+                recommendationText.textContent = "Your project relies heavily on spatial layout, built-in features, or specific workflows best handled by Authoring Tools.";
+            } else {
+                recommendationTitle.textContent = "Hybrid / Case-by-Case";
+                recommendationText.textContent = "Your project sits in the middle. Consider a hybrid approach or weigh your most critical constraint heavily.";
+            }
+
+            // Calculate Gauge Position (Score range -10 to +10)
+            let percentage = ((totalScore + 10) / 20) * 100;
+            percentage = Math.max(0, Math.min(100, percentage)); // Clamp between 0 and 100
+            
+            gaugeIndicator.style.left = `${percentage}%`;
+
+            // Determine packaging strategy based on Q6
+            if (gradingType === 'embed') {
+                packagingText.innerHTML = "<strong>Web Embed:</strong> Since you don't need tracking, you can host your vibe-coded HTML file and embed it directly into Canvas using an iframe.";
+            } else if (gradingType === 'rise') {
+                packagingText.innerHTML = "<strong>Rise Completion:</strong> Package your vibe-coded HTML as a Web Object inside Articulate Rise. Rise will handle passing the 'Complete' status to Canvas.";
+            } else if (gradingType === 'native_scorm') {
+                packagingText.innerHTML = "<strong>Native SCORM:</strong> Vibe-code a SCORM 1.2 wrapper for your custom web activity and upload it directly to Canvas to pass a percentage grade.";
+            } else if (gradingType === 'hybrid') {
+                packagingText.innerHTML = "<strong>Hybrid Approach:</strong> Insert your vibe-coded activity as a Web Object in Storyline, then use native Storyline slides for the graded questions to handle the SCORM passback.";
+            } else if (answeredCount > 0) {
+                packagingText.innerHTML = "Select an LMS Integration strategy in Question 6 to see packaging recommendations.";
+            }
+        }
+        
+        // Initialize gauge position on load
+        calculateResult();
+    </script>
+</body>
+</html>
